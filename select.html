@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Search</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    
+   
+<label for="pokemonInput" class="header">Search Pokémon:</label>
+<input type="text" id="pokemonInput" list="pokemonSuggestions" placeholder="Enter Pokémon name">
+<datalist id="pokemonSuggestions"></datalist>
+
+<div id="pokemonInfo">
+    <div class="info">
+        <p>Name: <span id="pokemonName"></span></p>
+        <p>Type: <span id="pokemonType"></span></p>
+        <p>Height: <span id="pokemonHeight"></span></p>
+        <p>Weight: <span id="pokemonWeight"></span></p>
+        <p>Bio: <span id="pokemonBio"></span></p>
+    </div>
+    <div>
+        <img id="pokemonImage" alt="Pokemon Image">
+    </div>
+
+    
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const inputElement = document.getElementById("pokemonInput");
+    const datalistElement = document.getElementById("pokemonSuggestions");
+    const pokemonInfoElement = document.getElementById("pokemonInfo");
+
+    inputElement.addEventListener("input", handleInput);
+
+    async function handleInput() {
+        const inputValue = inputElement.value.trim().toLowerCase();
+
+        if (inputValue.length !== 0) {
+            try {
+                const response = await axios.get(`https://pokeapi.co/api/v2/pokemon?limit=1000`);
+                const pokemonList = response.data.results;
+
+                const filteredPokemon = pokemonList
+                    .filter(pokemon => pokemon.name.includes(inputValue))
+                    .map(pokemon => pokemon.name);
+
+                updateSuggestions(filteredPokemon);
+
+            } catch (error) {
+                console.error("Error fetching Pokémon suggestions:", error);
+            }
+        } else {
+            clearSuggestions();
+        }
+    }
+
+    function updateSuggestions(pokemonList) {
+        datalistElement.innerHTML = "";
+
+        pokemonList.forEach(pokemonName => {
+            const optionElement = document.createElement("option");
+            optionElement.value = pokemonName;
+            datalistElement.appendChild(optionElement);
+        });
+    }
+
+    
+
+    function clearSuggestions() {
+        datalistElement.innerHTML = "";
+
+
+    }
+
+    async function displayPokemonDetails(pokemonName) {
+        try {
+            const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+            const pokemon = response.data;
+
+            const { name, types, height, weight } = pokemon;
+            const imageUrl = pokemon.sprites.front_default;
+
+            
+            
+            const speciesResponse = await axios.get(pokemon.species.url);
+            const bioText = speciesResponse.data.flavor_text_entries.find(entry => entry.language.name === 'en').flavor_text;
+
+            pokemonInfoElement.innerHTML = `
+                <h2>Name: ${name}</h2>
+                <p>Type: ${types.map(type => type.type.name).join(", ")}</p>
+                <p>Height: ${height/10} m</p>
+                <p>Weight: ${weight} lbs</p>
+                <p>Bio: ${bioText}</p>
+                <img id="pokemonImage" src="${imageUrl}" alt="Pokemon Image">
+            `;
+        } catch (error) {
+            console.error("Error fetching Pokémon details:", error);
+        }
+    }
+
+    inputElement.addEventListener("change", () => {
+        const selectedPokemon = inputElement.value.trim().toLowerCase();
+        displayPokemonDetails(selectedPokemon);
+    });
+
+</script>
+
+</body>
+</html>
