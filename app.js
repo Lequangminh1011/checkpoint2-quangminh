@@ -58,8 +58,8 @@ function toLowerCaseAndTrim(input) {
     return input.toLowerCase().trim();
 }
 
-// Gọi hàm để thực hiện chức năng tương ứng với ký tự nhập vào
-function performAction() {
+
+function getInformation() {
     let action = prompt("Nhập vào 1 ký tự trong 4 ký tự sau: 'C', 'R', 'U', 'D'");
     
     switch (action) {
@@ -80,5 +80,5 @@ function performAction() {
     }
 }
 
-// Gọi hàm để bắt đầu chương trình
-performAction();
+
+getInformation();
