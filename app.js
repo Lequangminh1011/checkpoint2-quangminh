@@ -51,6 +51,8 @@ function updateLocalStorage() {
 
 function getMenuFromLocalStorage() {
     let storedMenu = localStorage.getItem('menu');
+    return storedMenu ? JSON.parse(storedMenu) : menu;
+
     
 }
 
